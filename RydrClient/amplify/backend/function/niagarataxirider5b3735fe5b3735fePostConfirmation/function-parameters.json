@@ -1,0 +1,17 @@
+{
+  "trigger": true,
+  "modules": [
+    "custom"
+  ],
+  "parentResource": "niagarataxirider5b3735fe5b3735fe",
+  "functionName": "niagarataxirider5b3735fe5b3735fePostConfirmation",
+  "resourceName": "niagarataxirider5b3735fe5b3735fePostConfirmation",
+  "parentStack": "auth",
+  "triggerEnvs": [],
+  "triggerDir": "/snapshot/repo/build/node_modules/@aws-amplify/amplify-category-auth/provider-utils/awscloudformation/triggers/PostConfirmation",
+  "triggerTemplate": "PostConfirmation.json.ejs",
+  "triggerEventPath": "PostConfirmation.event.json",
+  "roleName": "niagarataxirider5b3735fe5b3735fePostConfirmation",
+  "skipEdit": true,
+  "enableCors": false
+}

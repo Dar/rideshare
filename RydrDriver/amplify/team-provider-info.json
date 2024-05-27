@@ -1,0 +1,28 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-niagarataxidriver-dev-213502-authRole",
+      "UnauthRoleArn": "arn:aws:iam::219289488861:role/amplify-niagarataxidriver-dev-213502-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::219289488861:role/amplify-niagarataxidriver-dev-213502-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-niagarataxidriver-dev-213502-deployment",
+      "UnauthRoleName": "amplify-niagarataxidriver-dev-213502-unauthRole",
+      "StackName": "amplify-niagarataxidriver-dev-213502",
+      "StackId": "arn:aws:cloudformation:us-east-1:219289488861:stack/amplify-niagarataxidriver-dev-213502/105426b0-6afb-11ee-92a4-0aa119094d91",
+      "AmplifyAppId": "d1yzlaqc4yjo90",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-niagarataxidriver-dev-213502-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
+    },
+    "categories": {
+      "auth": {
+        "niagarataxidriver5f1330a95f1330a9": {},
+        "niagarataxidriverff0aa1acff0aa1ac": {}
+      },
+      "function": {
+        "niagarataxidriverff0aa1acff0aa1acPostConfirmation": {
+          "deploymentBucketName": "amplify-niagarataxidriver-dev-213502-deployment",
+          "s3Key": "amplify-builds/niagarataxidriverff0aa1acff0aa1acPostConfirmation-4f415057376b71365579-build.zip"
+        }
+      }
+    }
+  }
+}

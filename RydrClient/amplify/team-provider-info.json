@@ -1,0 +1,30 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-niagarataxirider-dev-154041-authRole",
+      "UnauthRoleArn": "arn:aws:iam::219289488861:role/amplify-niagarataxirider-dev-154041-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::219289488861:role/amplify-niagarataxirider-dev-154041-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-niagarataxirider-dev-154041-deployment",
+      "UnauthRoleName": "amplify-niagarataxirider-dev-154041-unauthRole",
+      "StackName": "amplify-niagarataxirider-dev-154041",
+      "StackId": "arn:aws:cloudformation:us-east-1:219289488861:stack/amplify-niagarataxirider-dev-154041/0f58fe50-e858-11ed-83fc-0e527658e07f",
+      "AmplifyAppId": "d5zo9rro33ree",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-niagarataxirider-dev-154041-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
+    },
+    "categories": {
+      "auth": {
+        "niagarataxirider5b3735fe5b3735fe": {}
+      },
+      "function": {
+        "niagarataxirider5b3735fe5b3735fePostConfirmation": {
+          "deploymentBucketName": "amplify-niagarataxirider-dev-154041-deployment",
+          "s3Key": "amplify-builds/niagarataxirider5b3735fe5b3735fePostConfirmation-2b2b586d2b4973504f65-build.zip"
+        }
+      },
+      "api": {
+        "niagarataxirider": {}
+      }
+    }
+  }
+}

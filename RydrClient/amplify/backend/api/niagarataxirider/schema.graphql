@@ -1,0 +1,57 @@
+type User @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  username: String!
+  given_name: String!
+  family_name: String!
+  phone_number: String!
+  currentLat: Float!
+  currentLng: Float!
+  heading: Float!
+  email: String!
+  orders: [Order] @hasMany(indexName: "byUser", fields: ["id"])
+}
+
+type Driver @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  username: String!
+  given_name: String!
+  family_name: String!
+  phone_number: String!
+  currentLat: Float!
+  currentLng: Float!
+  heading: Float!
+  email: String!
+  type: String!
+  isActive: Boolean!
+  orders: [Order] @hasMany(indexName: "byDriver", fields: ["id"])
+}
+
+type Order @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  createdAt: String!
+  type: String!
+  status: String!
+  origin: String!
+  destination: String!
+  originAddress: String!
+  destinationAddress: String!
+  fare: Float!
+  scheduleDate: String!
+  passengerNumber: String!
+  paymentType: String!
+  notes: String!
+  designate: String!
+  userId: ID! @index(name: "byUser")
+  user: User @belongsTo(fields: ["userId"])
+  driverId: ID @index(name: "byDriver")
+  driver: Driver @belongsTo(fields: ["driverId"])
+}
+
+type Subscription {
+  onOrderUpdated(id: ID!): Order @aws_subscribe(mutations: ["updateOrder"])
+  onDriverUpdated(id: ID!): Driver @aws_subscribe(mutations: ["updateDriver"])
+  onDriversUpdated: Driver @aws_subscribe(mutations: ["updateDriver"])
+  onDriverDeleted: Driver @aws_subscribe(mutations: ["deleteDriver"])
+  onDriverActive(isActive: Boolean!): Driver
+    @aws_subscribe(mutations: ["updateDriver"])
+}

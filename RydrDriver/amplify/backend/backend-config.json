@@ -1,0 +1,64 @@
+{
+  "api": {},
+  "auth": {
+    "niagarataxidriverff0aa1acff0aa1ac": {
+      "customAuth": false,
+      "dependsOn": [
+        {
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "niagarataxidriverff0aa1acff0aa1acPostConfirmation",
+          "triggerProvider": "Cognito"
+        }
+      ],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyCharacters": [],
+          "passwordPolicyMinLength": 8
+        },
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito"
+    }
+  },
+  "function": {
+    "niagarataxidriverff0aa1acff0aa1acPostConfirmation": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_niagarataxidriverff0aa1acff0aa1acPostConfirmation_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "niagarataxidriverff0aa1acff0aa1acPostConfirmation"
+        }
+      ]
+    },
+    "AMPLIFY_function_niagarataxidriverff0aa1acff0aa1acPostConfirmation_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "niagarataxidriverff0aa1acff0aa1acPostConfirmation"
+        }
+      ]
+    }
+  }
+}
