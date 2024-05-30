@@ -11,7 +11,7 @@ import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete'
 import {useForm} from 'react-hook-form';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
-import {GOOGLE_API_KEY} from '../../../constants';
+import {GOOGLE_API_KEY} from '@env';
 import {colors, transparentColor} from '../../../shared/common/styles/';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {

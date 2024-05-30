@@ -2,7 +2,7 @@ import React, {useRef, useState, useEffect} from 'react';
 import {View, Animated, useWindowDimensions} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Polyline} from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
-import {GOOGLE_API_KEY} from '../../constants';
+import {GOOGLE_API_KEY} from '@env';
 import {useAppDispatch, useAppSelector} from '../../store/app/hooks';
 import {
   setDistance,

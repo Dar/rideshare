@@ -11,7 +11,7 @@ import {
 import {API, graphqlOperation} from 'aws-amplify';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
-import {GOOGLE_API_KEY} from '../../constants';
+import {GOOGLE_API_KEY} from '@env';
 import {useAppDispatch, useAppSelector} from '../../store/app/hooks';
 import {Easing} from 'react-native-reanimated';
 import {

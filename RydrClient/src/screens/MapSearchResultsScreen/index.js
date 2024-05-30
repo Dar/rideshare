@@ -28,7 +28,7 @@ import {
   setDestinationAddress,
   setOriginPlace,
 } from '../../store/features/map/map-slice';
-import {GOOGLE_API_KEY} from '../../constants';
+import {GOOGLE_API_KEY} from '@env';
 import RippleButton from '../../components/UI/RippleButton';
 import {useFocusEffect} from '@react-navigation/native';
 

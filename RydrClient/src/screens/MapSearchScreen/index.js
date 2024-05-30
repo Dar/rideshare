@@ -3,7 +3,7 @@ import {View, Text} from 'react-native';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 import {useNavigation} from '@react-navigation/native';
 import SearchRow from '../../components/SearchRow/SearchRow';
-import {GOOGLE_API_KEY} from '../../constants';
+import {GOOGLE_API_KEY} from '@env';
 import TripDirectory from '../../components/TripDirectory';
 import {colors, transparentColor} from '../../shared/common/styles/';
 import screen_styles from './styles';

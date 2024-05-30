@@ -3,7 +3,7 @@ import {Dimensions} from 'react-native';
 import Geocoder from 'react-native-geocoding';
 
 import {getCurrentLocation} from '../../../shared/helper/helperFunction';
-import {GOOGLE_API_KEY} from '../../../constants';
+import {GOOGLE_API_KEY} from '@env';
 
 const {width, height} = Dimensions.get('window');
 
