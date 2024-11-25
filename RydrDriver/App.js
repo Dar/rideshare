@@ -18,8 +18,9 @@ import {locationPermission} from './src/shared/helper/helperFunction';
 import {store} from './src/store/app/store';
 import {PersistGate} from 'redux-persist/integration/react';
 import {persistStore} from 'redux-persist';
-import {GOOGLE_API_KEY} from '@env';
 import Geocoder from 'react-native-geocoding';
+import { GOOGLE_API_KEY } from '@env';
+
 Amplify.configure(awsconfig);
 let persistor = persistStore(store);
 Geocoder.init(GOOGLE_API_KEY);

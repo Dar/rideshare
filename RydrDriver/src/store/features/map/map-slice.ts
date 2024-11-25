@@ -2,7 +2,6 @@ import {createSlice, PayloadAction, createAsyncThunk} from '@reduxjs/toolkit';
 import Geocoder from 'react-native-geocoding';
 import {getCurrentLocation} from '../../../shared/helper/helperFunction';
 import {calculateRadius} from '../../../constants';
-import {GOOGLE_API_KEY} from '@env';
 interface MapState {
   currentLatitude: number;
   currentLongitude: number;
@@ -80,12 +79,12 @@ export const getPlaceIdDetails = createAsyncThunk(
       const destinationPlaceId = payload.destinationData;
 
       const originResponse = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${originPlaceId}&key=${GOOGLE_API_KEY}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${originPlaceId}&key=${process.env.GOOGLE_API_KEY}`,
       );
       const originData = await originResponse.json();
 
       const destinationResponse = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${destinationPlaceId}&key=${GOOGLE_API_KEY}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${destinationPlaceId}&key=${process.env.GOOGLE_API_KEY}`,
       );
       const destinationData = await destinationResponse.json();
 

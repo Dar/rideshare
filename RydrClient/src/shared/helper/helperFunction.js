@@ -88,7 +88,6 @@ const getFare = (order, distance = 0) => {
 
 const calculateRegion = (originCoords, destinationCoords) => {
   const allCoordinates = [originCoords, destinationCoords];
-  console.log('ALLCOORDS', allCoordinates);
   if (!allCoordinates.length) return;
 
   let minLat = Infinity;

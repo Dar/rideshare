@@ -78,6 +78,7 @@ export const getActiveOrder = createAsyncThunk(
 export const fetchOrder = createAsyncThunk(
   'order/fetchOrder',
   async (data, {rejectWithValue}) => {
+    console.log('FETCH ORDER', data);
     try {
       const orderData = (await API.graphql(
         graphqlOperation(getOrder, {id: data}),

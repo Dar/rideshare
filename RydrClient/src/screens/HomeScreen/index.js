@@ -24,7 +24,7 @@ import {
   setDeltas,
 } from '../../store/features/map/map-slice';
 import {updateActiveUser} from '../../store/features/riders/rider-slice';
-import {setOrderActive, setOrder} from '../../store/features/order/order-slice';
+import {setOrderActive, setOrder, fetchOrder} from '../../store/features/order/order-slice';
 import {colors} from '../../shared/common/styles/';
 import screen_styles from './styles';
 import {
@@ -32,6 +32,7 @@ import {
   updateDrivers,
   addDrivers,
   removeDrivers,
+  clearDriversState
 } from '../../store/features/drivers/drivers-slice';
 import {onDriversUpdated, onDriverDeleted} from '../../graphql/subscriptions';
 
@@ -75,6 +76,12 @@ const HomeScreen = props => {
   );
 
   useEffect(() => {
+    dispatch(fetchOrder(order?.userId));
+    console.log('order', profile?.sub);
+
+  }, [profile]);
+
+  useEffect(() => {
     dispatch(
       setDeltas({latitudeDelta: aspectRatio, longitudeDelta: deltaValue}),
     );
@@ -110,6 +117,7 @@ const HomeScreen = props => {
   const goToSearch = () => {
     dispatch(setOrderActive(false));
     dispatch(clearMapState());
+    dispatch(clearDriversState());    
     dispatch(setOrder(null));
     navigation.navigate('MapSearchScreen');
   };

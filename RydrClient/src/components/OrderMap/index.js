@@ -192,23 +192,14 @@ const OrderMap = ({car}) => {
             mapViewBoundariesForCoords[1].longitude,
         );
 
-        let edgePadding;
-        if (distance > 80) {
-          // Greater than 80, set larger edge padding
-          edgePadding = {
+        let edgePadding = {
             right: 150 + lngDelta * 20,
             bottom: 150 + latDelta * 20,
             left: 150 + lngDelta * 20,
             top: 150 + latDelta * 20,
           };
-        } else {
-          edgePadding = {
-            right: 50 + lngDelta * 20,
-            bottom: 50 + latDelta * 20,
-            left: 50 + lngDelta * 20,
-            top: 50 + latDelta * 20,
-          };
-        }
+    
+      
         mapRef.current.fitToCoordinates(
           [mapViewBoundariesForCoords[0], mapViewBoundariesForCoords[1]],
           {

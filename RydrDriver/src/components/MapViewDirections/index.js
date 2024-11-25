@@ -4,7 +4,6 @@ import {Marker, AnimatedRegion} from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import {useStyle} from './styles.js';
 import {deltaValue} from '../../constants';
-import {GOOGLE_API_KEY} from '@env';
 import {useAppSelector, useAppDispatch} from '../../store/app/hooks.ts';
 import {
   setDistance,
@@ -111,7 +110,7 @@ const MapViewDirectionsComponent = forwardRef((props, ref) => {
             origin={mapViewBoundariesForCoords[0]}
             destination={mapViewBoundariesForCoords[1]}
             optimizeWaypoints={true}
-            apikey={GOOGLE_API_KEY}
+            apikey={process.env.GOOGLE_API_KEY}
             strokeWidth={3}
             strokeColor="red"
             onStart={params => {

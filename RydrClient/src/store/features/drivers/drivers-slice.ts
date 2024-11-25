@@ -25,8 +25,7 @@ export const getActiveCars = createAsyncThunk(
       const response = (await API.graphql(
         graphqlOperation(listDrivers, {filter: {isActive: {eq: true}}}),
       )) as GraphQLResult<ListDriversQuery>;
-      console.log('getActiveCars', response?.data?.listDrivers?.items);
-      return response?.data?.listDrivers?.items;
+     return response?.data?.listDrivers?.items;
     } catch (e) {
       rejectWithValue(e.response.data);
     }

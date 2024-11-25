@@ -1,9 +1,9 @@
 import {createSlice, PayloadAction, createAsyncThunk} from '@reduxjs/toolkit';
 import {Dimensions} from 'react-native';
 import Geocoder from 'react-native-geocoding';
-
 import {getCurrentLocation} from '../../../shared/helper/helperFunction';
 import {GOOGLE_API_KEY} from '@env';
+import {calculateRadius} from '../../../constants';
 
 const {width, height} = Dimensions.get('window');
 
@@ -30,7 +30,10 @@ interface MapState {
   mapViewBoundariesForCoords: object[];
   latitude: number;
   longitude: number;
+  region: object | null;
   prevLatLng: object;
+  mapStatus: string;
+  error: any;
 }
 
 const initialState: MapState = {
@@ -55,7 +58,10 @@ const initialState: MapState = {
   distanceTravelled: 0,
   latitude: 0,
   longitude: 0,
+  region: null,
   prevLatLng: {},
+  mapStatus: '',
+  error: null,
 };
 
 export const getLiveLocation = createAsyncThunk(
@@ -154,9 +160,29 @@ const mapsSlice = createSlice({
     },
     setCurrentPosition(state, action: PayloadAction<any>) {
       const {latitude, longitude, heading} = action.payload;
-      state.currentLatitude = latitude;
-      state.currentLongitude = longitude;
-      state.heading = heading;
+      const prevLatitude = state.currentLatitude;
+      const prevLongitude = state.currentLongitude;
+      if (
+        prevLatitude !== null &&
+        prevLatitude !== latitude &&
+        prevLongitude !== null &&
+        prevLongitude !== longitude
+      ) {
+        // Calculate distance between previous and current coordinates
+        const distance = calculateRadius(
+          prevLatitude,
+          prevLongitude,
+          latitude,
+          longitude,
+        );
+
+        //update state after distance is greate than 10 meters to it only runs in that interval
+        if (distance > 10) {
+          state.currentLatitude = latitude;
+          state.currentLongitude = longitude;
+          state.heading = heading;
+        }
+      }
     },
     setTripCoordinates(state, action: PayloadAction<any>) {
       state.tripCoordinates = action.payload;

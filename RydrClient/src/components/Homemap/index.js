@@ -19,9 +19,7 @@ const HomeMap = ({
   useEffect(() => {
     let isMounted = true;
     if (isMounted) {
-      if (!drivers?.length) {
-        dispatch(getActiveCars());
-      }
+      dispatch(getActiveCars());
     }
     return () => {
       isMounted = false;

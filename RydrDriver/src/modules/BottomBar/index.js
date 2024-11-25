@@ -108,73 +108,69 @@ const BottomBar = ({
 
   return (
     <>
-      <>
-        <View style={styles.bottomBarPos}>
-          <View style={styles.controls}>
-            <Pressable
-              style={styles.elevatedButton}
-              onPress={handleLoadSettings}>
-              <Ionicons name={'options'} size={30} color={colors.softwhite} />
-            </Pressable>
-            {renderBottomBar()}
-            <Pressable
-              style={styles.elevatedButton}
-              onPress={handleLoadTripItinerary}>
-              <Entypo name={'menu'} size={30} color={colors.softwhite} />
-            </Pressable>
-          </View>
-          <View style={styles.contactPanel}>
-            <View style={styles.riderInfo}>
-              <IconButton
-                size={32}
-                iconName="phone"
-                brand={'AntDesign'}
-                isClickable={true}
-                handler={() => console.log('Phone')}
-                iconColor={colors.darkText}
-              />
-              <View
+      <View style={styles.bottomBarPos}>
+        <View style={styles.controls}>
+          <Pressable style={styles.elevatedButton} onPress={handleLoadSettings}>
+            <Ionicons name={'options'} size={30} color={colors.softwhite} />
+          </Pressable>
+          {renderBottomBar()}
+          <Pressable
+            style={styles.elevatedButton}
+            onPress={handleLoadTripItinerary}>
+            <Entypo name={'menu'} size={30} color={colors.softwhite} />
+          </Pressable>
+        </View>
+        <View style={styles.contactPanel}>
+          <View style={styles.riderInfo}>
+            <IconButton
+              size={32}
+              iconName="phone"
+              brand={'AntDesign'}
+              isClickable={true}
+              handler={() => console.log('Phone')}
+              iconColor={colors.darkText}
+            />
+            <View
+              style={{
+                flex: 1,
+                borderRightColor: colors.lightblack,
+                borderRightWidth: 1,
+                borderLeftColor: colors.lightblack,
+                borderLeftWidth: 1,
+                height: '100%',
+                justifyContent: 'center',
+              }}>
+              <Text
                 style={{
-                  flex: 1,
-                  borderRightColor: colors.lightblack,
-                  borderRightWidth: 1,
-                  borderLeftColor: colors.lightblack,
-                  borderLeftWidth: 1,
-                  height: '100%',
-                  justifyContent: 'center',
+                  fontSize: 16,
+                  color: colors.darkText,
+                  textAlign: 'center',
                 }}>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: colors.darkText,
-                    textAlign: 'center',
-                  }}>
-                  {data?.given_name}
-                </Text>
-              </View>
-              <IconButton
-                size={32}
-                iconName="user"
-                brand={'AntDesign'}
-                isClickable={true}
-                handler={() => console.log('user')}
-                iconColor={colors.darkText}
-              />
+                {data?.given_name}
+              </Text>
             </View>
-            <View style={{marginTop: 20, paddingHorizontal: 20}}>
-              <CustomButton
-                bgColor={
-                  order?.status === 'STARTING_TRIP' ? colors.green : colors.red
-                }
-                fgColor={colors.softwhite}
-                text={buttonText(order?.status)}
-                onPress={handleOrderState}
-                type="PRIMARY"
-              />
-            </View>
+            <IconButton
+              size={32}
+              iconName="user"
+              brand={'AntDesign'}
+              isClickable={true}
+              handler={() => console.log('user')}
+              iconColor={colors.darkText}
+            />
+          </View>
+          <View style={{marginTop: 20, paddingHorizontal: 20}}>
+            <CustomButton
+              bgColor={
+                order?.status === 'STARTING_TRIP' ? colors.green : colors.red
+              }
+              fgColor={colors.softwhite}
+              text={buttonText(order?.status)}
+              onPress={handleOrderState}
+              type="PRIMARY"
+            />
           </View>
         </View>
-      </>
+      </View>
     </>
   );
 };

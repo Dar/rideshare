@@ -100,7 +100,7 @@ if (
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-export const proximityThreshold = 30;
+export const proximityThreshold = 80;
 
 const Messaging = lazy(() => import('../../modules/Messaging'));
 const TripItinerary = lazy(() => import('../../modules/TripItinerary'));
@@ -113,13 +113,13 @@ const HomeScreen = () => {
   const {height, width} = useWindowDimensions();
   const aspectRatio = (width / height) * deltaValue;
   const dispatch = useAppDispatch();
-  const [showBox, setShowBox] = useState(false);
+  const [showTestBox, setShowBox] = useState(false);
 
   const activeOrderSub = useRef();
   const activeDriver = useRef();
   const ordersSubscriptoin = useRef();
   const showInfoBox = () => {
-    setShowBox(!showBox);
+    setShowBox(!showTestBox);
   };
   // get MAP
   const {
@@ -151,7 +151,7 @@ const HomeScreen = () => {
   const [pause, setPause] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [markerCoord, setMarkerCoords] = useState(null);
-  const [directions, setDirections] = useState(null); // was used for navigator
+  const [directions, setDirections] = useState(null); 
   const [resetKey, setResetKey] = useState(0);
   const [pan, setPanUp] = useState(false);
 
@@ -209,6 +209,7 @@ const HomeScreen = () => {
     if (isMounted) {
       if (!order && data?.isActive && ordersdata.length > 0) {
         hideBottomBar(bottomBar);
+        hideMapViewControls(cashBox, panelDisplay, sideBar, height);
       }
       if (ordersdata.length === 0) {
         showBottomBar(bottomBar);
@@ -249,14 +250,14 @@ const HomeScreen = () => {
   }, [order?.status, data?.isActive, ordersdata?.length]);
 
   const tripDistance = useMemo(() => {
-    let distance = 50;
+    let distance = 50; 
     if (data?.currentLat && data?.currentLng) {
       switch (order?.status) {
         case 'PICKING_UP_CLIENT':
           distance = calculateDistance(
             {
-              latitude: data?.currentLat,
-              longitude: data?.currentLng,
+              latitude: data.currentLat,
+              longitude: data.currentLng,
             },
             {
               latitude: origin?.geometry?.location?.lat,
@@ -265,22 +266,11 @@ const HomeScreen = () => {
           );
           break;
         case 'STARTING_TRIP':
-          distance = calculateDistance(
-            {
-              latitude: data?.currentLat,
-              longitude: data?.currentLng,
-            },
-            {
-              latitude: destination?.geometry?.location?.lat,
-              longitude: destination?.geometry?.location?.lng,
-            },
-          );
-          break;
         case 'ARRIVED_AT_DESTINATION':
           distance = calculateDistance(
             {
-              latitude: data?.currentLat,
-              longitude: data?.currentLng,
+              latitude: data.currentLat,
+              longitude: data.currentLng,
             },
             {
               latitude: destination?.geometry?.location?.lat,
@@ -288,18 +278,17 @@ const HomeScreen = () => {
             },
           );
           break;
-
         default:
           distance = 50;
       }
     }
     return distance;
-  }, [data?.currentLat, data?.currentLng, order?.status]);
+  }, [data?.currentLat, data?.currentLng, order?.status, origin, destination]);
 
   useEffect(() => {
     if (order?.status === 'PICKING_UP_CLIENT') {
       if (tripDistance <= proximityThreshold) {
-        //dispatch(setOrderState('ARRIVED_FOR_PICKUP'));
+        dispatch(setOrderState('ARRIVED_FOR_PICKUP'));
         const input = {
           id: order.id,
           status: 'ARRIVED_FOR_PICKUP',
@@ -310,7 +299,7 @@ const HomeScreen = () => {
     }
     if (order?.status === 'STARTING_TRIP') {
       if (tripDistance <= proximityThreshold) {
-        // dispatch(setOrderState('ARRIVED_AT_DESTINATION'));
+        dispatch(setOrderState('ARRIVED_AT_DESTINATION'));
         const input = {
           id: order.id,
           status: 'ARRIVED_AT_DESTINATION',
@@ -384,58 +373,53 @@ const HomeScreen = () => {
     }
   }, [data?.isActive]);
 
-  useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
-      if (!order && data?.isActive && ordersdata.length > 0) {
-        hideMapViewControls(cashBox, panelDisplay, sideBar, height);
-      }
-    }
-    return () => {
-      isMounted = false;
-    };
-  }, [ordersdata.length]);
+
 
   // ******************** RUN TRIP SIMULATOR
-  useEffect(() => {
-    if (order?.status === 'PICKING_UP_CLIENT') {
-      const interval = setInterval(() => {
-        dispatch(updateMovement(routeCoordinates[0]?.end_location));
-        dispatch(setRouteNavigation(routeCoordinates.slice(1)));
-      }, 1000);
+  // **************************************** 
+  // **************************************** 
 
-      if (!routeCoordinates.length) {
-        clearInterval(interval);
-      }
+  // useEffect(() => {
+  //   if (order?.status === 'PICKING_UP_CLIENT') {
+  //     const interval = setInterval(() => {
+  //       dispatch(updateMovement(routeCoordinates[0]?.end_location));
+  //       dispatch(setRouteNavigation(routeCoordinates.slice(1)));
+  //     }, 1000);
 
-      return () => clearInterval(interval);
-    } else if (order?.status === 'STARTING_TRIP') {
-      const interval = setInterval(() => {
-        dispatch(updateMovement(routeCoordinates[0]?.end_location));
-        dispatch(setRouteNavigation(routeCoordinates.slice(1)));
-      }, 1000);
+  //     if (!routeCoordinates.length) {
+  //       clearInterval(interval);
+  //     }
 
-      if (!routeCoordinates.length) {
-        clearInterval(interval);
-      }
+  //     return () => clearInterval(interval);
+  //   } else if (order?.status === 'STARTING_TRIP') {
+  //     const interval = setInterval(() => {
+  //       dispatch(updateMovement(routeCoordinates[0]?.end_location));
+  //       dispatch(setRouteNavigation(routeCoordinates.slice(1)));
+  //     }, 1000);
 
-      return () => clearInterval(interval);
-    }
-  }, [routeCoordinates.length, order?.status]);
+  //     if (!routeCoordinates.length) {
+  //       clearInterval(interval);
+  //     }
+
+  //     return () => clearInterval(interval);
+  //   }
+  // }, [routeCoordinates.length, order?.status]);
 
   // ******************** END RUN TRIP SIMULATOR
+  // **************************************** 
+  // **************************************** 
 
-  // Drive locaiton change
+  // Drive location change
 
-  const onDriverLocationChange = async event => {
-    const {latitude, longitude, heading} = event.nativeEvent.coordinate;
+   const onDriverLocationChange = async event => {
+    // const {latitude, longitude, heading} = event.nativeEvent.coordinate;
     // dispatch(setCurrentPosition({latitude, longitude, heading}));
     // mapView.current.animateCamera({
     //   heading: heading,
     //   pitch: 0,
     //   zoom: 10,
     // });
-  };
+   };
 
   // Watch Position
   useEffect(() => {
@@ -468,11 +452,16 @@ const HomeScreen = () => {
   }, [currentLatitude, currentLongitude, heading]);
 
   const onDecline = () => {
-    setResetKey(prevKey => prevKey + 1);
-    dispatch(updateOrderList(ordersdata));
+    if (ordersdata.length === 1) { 
+      dispatch(clearOrdersState());
+      dispatch(clearMapState());
+    }
     if (!ordersdata.length) {
       showMapViewControls(cashBox, sideBar);
     }
+    setResetKey(prevKey => prevKey + 1);
+    dispatch(updateOrderList(ordersdata));
+  
   };
 
   const onAccept = activeOrder => {
@@ -736,7 +725,7 @@ const HomeScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{flex: 1, backgroundColor: colors.softwhite}}>
       <View style={styles.container}>
-        {/* {showBox ? (
+        {/* {showTestBox ? (
           <View
             style={{
               backgroundColor: colors.black,

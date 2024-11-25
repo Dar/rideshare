@@ -47,7 +47,7 @@
     "react-native": "0.68.2",
     "react-native-actions-sheet": "^0.8.10",
     "react-native-collapsible": "^1.6.0",
-    "react-native-dotenv": "^3.4.8",
+    "react-native-dotenv": "^3.4.11",
     "react-native-elements": "^3.4.2",
     "react-native-flash-message": "^0.4.0",
     "react-native-geocoding": "^0.5.0",

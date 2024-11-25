@@ -1,5 +1,4 @@
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
-import {GOOGLE_API_KEY} from '@env';
 
 export const mapsApi = createApi({
   reducerPath: 'mapsApi',
@@ -11,8 +10,8 @@ export const mapsApi = createApi({
       fetchLocationData: builder.query({
         query: ({originPlaceId, destinationPlaceId}) => {
           return (
-            `?place_id=${originPlaceId}&key=${GOOGLE_API_KEY}` +
-            `&place_id=${destinationPlaceId}&key=${GOOGLE_API_KEY}`
+            `?place_id=${originPlaceId}&key=${process.env.GOOGLE_API_KEY}` +
+            `&place_id=${destinationPlaceId}&key=${process.env.GOOGLE_API_KEY}`
           );
         },
       }),
