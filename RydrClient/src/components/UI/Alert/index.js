@@ -13,7 +13,7 @@ export const AlertWithCallback = (title, message, callback) => {
       {
         text: 'Confirm',
         onPress: () => {
-          callback(); // Execute the callback function after a delay
+          callback(); 
         },
       },
     ],

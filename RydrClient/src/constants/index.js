@@ -46,3 +46,4 @@ export const EMAIL_REGEX =
   
   const toRad = angle => (angle * Math.PI) / 180;
   
+  export const proximityThreshold = 10;

@@ -1,10 +1,8 @@
-import React, {useEffect, useRef} from 'react';
+import React, { useRef} from 'react';
 import {Image, Animated, View} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import {getCarTypeImage} from '../../shared/helper/helperFunction';
 import component_styles from './styles';
-import {useAppDispatch} from '../../store/app/hooks';
-import {getActiveCars} from '../../store/features/drivers/drivers-slice';
 
 const HomeMap = ({
   curLatitude,
@@ -13,18 +11,8 @@ const HomeMap = ({
   longitudeDelta,
   drivers,
 }) => {
-  const dispatch = useAppDispatch();
   const mapRef = useRef(null);
 
-  useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
-      dispatch(getActiveCars());
-    }
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const getDrivers = () => {
     return drivers

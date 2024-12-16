@@ -66,7 +66,6 @@ import {
   clearOrderState,
   setOrderState,
 } from '../../store/features/order/order-slice';
-import imagePath from '../../shared/common/imagePath.js';
 import {
   showCard,
   hideCard,
@@ -79,10 +78,7 @@ import {
 } from '../../constants/animations.js';
 import MapViewDirectionsComponent from '../../components/MapViewDirections/';
 import BottomBar from '../../modules/BottomBar/index.js';
-import {
-  calculateHeading,
-  calculateRegion,
-} from '../../shared/helper/helperFunction.js';
+import {calculateRegion} from '../../shared/helper/helperFunction.js';
 import {useKeepAwake} from '@sayem314/react-native-keep-awake';
 import RouteNavigation from '../../components/RouteNavigation/index.js';
 import {
@@ -90,8 +86,7 @@ import {
   onOrderUpdated,
   onDriverUpdated,
 } from '../../graphql/subscriptions';
-import {ordersByDriverId} from '../../graphql/queries.js';
-import {calculateDistance} from '../../constants/index.js';
+import {calculateDistance,proximityThreshold} from '../../constants/index.js';
 import WithBottomSheet from '../../components/UI/WithBottomSheet/index.js';
 
 if (
@@ -100,7 +95,6 @@ if (
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-export const proximityThreshold = 80;
 
 const Messaging = lazy(() => import('../../modules/Messaging'));
 const TripItinerary = lazy(() => import('../../modules/TripItinerary'));
@@ -151,7 +145,7 @@ const HomeScreen = () => {
   const [pause, setPause] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [markerCoord, setMarkerCoords] = useState(null);
-  const [directions, setDirections] = useState(null); 
+  const [directions, setDirections] = useState(null);
   const [resetKey, setResetKey] = useState(0);
   const [pan, setPanUp] = useState(false);
 
@@ -250,7 +244,7 @@ const HomeScreen = () => {
   }, [order?.status, data?.isActive, ordersdata?.length]);
 
   const tripDistance = useMemo(() => {
-    let distance = 50; 
+    let distance = 50;
     if (data?.currentLat && data?.currentLng) {
       switch (order?.status) {
         case 'PICKING_UP_CLIENT':
@@ -287,12 +281,13 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (order?.status === 'PICKING_UP_CLIENT') {
+      console.log('tripDistance', tripDistance);
       if (tripDistance <= proximityThreshold) {
         dispatch(setOrderState('ARRIVED_FOR_PICKUP'));
         const input = {
           id: order.id,
           status: 'ARRIVED_FOR_PICKUP',
-          driverId: data.id,
+          driverId: data?.id,
         };
         dispatch(setOrder(input));
       }
@@ -373,45 +368,50 @@ const HomeScreen = () => {
     }
   }, [data?.isActive]);
 
-
-
   // ******************** RUN TRIP SIMULATOR
-  // **************************************** 
-  // **************************************** 
+  // ****************************************
+  // ****************************************
 
-  // useEffect(() => {
-  //   if (order?.status === 'PICKING_UP_CLIENT') {
-  //     const interval = setInterval(() => {
-  //       dispatch(updateMovement(routeCoordinates[0]?.end_location));
-  //       dispatch(setRouteNavigation(routeCoordinates.slice(1)));
-  //     }, 1000);
+  useEffect(() => {
+    if (order?.status === 'PICKING_UP_CLIENT') {
+      const interval = setInterval(() => {
+        dispatch(updateMovement(routeCoordinates[0]?.end_location));
+        dispatch(setRouteNavigation(routeCoordinates.slice(1)));
+        // dispatch(
+        //   updateActiveDriver({
+        //     currentLat: currentLatitude,
+        //     currentLng: currentLongitude,
+        //     heading,
+        //   }),
+        // );
+      }, 1000);
 
-  //     if (!routeCoordinates.length) {
-  //       clearInterval(interval);
-  //     }
+      if (!routeCoordinates.length) {
+        clearInterval(interval);
+      }
 
-  //     return () => clearInterval(interval);
-  //   } else if (order?.status === 'STARTING_TRIP') {
-  //     const interval = setInterval(() => {
-  //       dispatch(updateMovement(routeCoordinates[0]?.end_location));
-  //       dispatch(setRouteNavigation(routeCoordinates.slice(1)));
-  //     }, 1000);
+      return () => clearInterval(interval);
+    } else if (order?.status === 'STARTING_TRIP') {
+      const interval = setInterval(() => {
+        dispatch(updateMovement(routeCoordinates[0]?.end_location));
+        dispatch(setRouteNavigation(routeCoordinates.slice(1)));
+      }, 1000);
 
-  //     if (!routeCoordinates.length) {
-  //       clearInterval(interval);
-  //     }
+      if (!routeCoordinates.length) {
+        clearInterval(interval);
+      }
 
-  //     return () => clearInterval(interval);
-  //   }
-  // }, [routeCoordinates.length, order?.status]);
+      return () => clearInterval(interval);
+    }
+  }, [routeCoordinates.length, order?.status]);
 
   // ******************** END RUN TRIP SIMULATOR
-  // **************************************** 
-  // **************************************** 
+  // ****************************************
+  // ****************************************
 
   // Drive location change
 
-   const onDriverLocationChange = async event => {
+  const onDriverLocationChange = async event => {
     // const {latitude, longitude, heading} = event.nativeEvent.coordinate;
     // dispatch(setCurrentPosition({latitude, longitude, heading}));
     // mapView.current.animateCamera({
@@ -419,7 +419,7 @@ const HomeScreen = () => {
     //   pitch: 0,
     //   zoom: 10,
     // });
-   };
+  };
 
   // Watch Position
   useEffect(() => {
@@ -452,7 +452,7 @@ const HomeScreen = () => {
   }, [currentLatitude, currentLongitude, heading]);
 
   const onDecline = () => {
-    if (ordersdata.length === 1) { 
+    if (ordersdata.length === 1) {
       dispatch(clearOrdersState());
       dispatch(clearMapState());
     }
@@ -461,7 +461,6 @@ const HomeScreen = () => {
     }
     setResetKey(prevKey => prevKey + 1);
     dispatch(updateOrderList(ordersdata));
-  
   };
 
   const onAccept = activeOrder => {
@@ -551,7 +550,7 @@ const HomeScreen = () => {
       });
     }
 
-    return () => activeOrderSub.current.unsubscribe();
+    return () => activeOrderSub.current?.unsubscribe();
   }, [order]);
 
   useEffect(() => {

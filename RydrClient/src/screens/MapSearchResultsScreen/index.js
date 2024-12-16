@@ -96,7 +96,7 @@ const MapSearchResultsScreen = props => {
         destination: destination.details.place_id,
         originAddress: 'ADD ORIGIN ADDRESS HERE',
         destinationAddress: 'ADD DESTINATION ADDRESS HERE',
-        driverId: '0',
+        driverId: null,
         status: 'NEW',
         fare: 0,
         userId: userInfo.attributes.sub,

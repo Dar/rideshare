@@ -17,6 +17,7 @@ import TimeDatePicker from '../../components/TimeDatePicker';
 import WithBottomSheet from '../../components/UI/WithBottomSheet';
 import {useAppDispatch, useAppSelector} from '../../store/app/hooks';
 import RippleButton from '../../components/UI/RippleButton';
+
 import {
   getLiveLocation,
   getCurrentAddress,
@@ -24,7 +25,7 @@ import {
   setDeltas,
 } from '../../store/features/map/map-slice';
 import {updateActiveUser} from '../../store/features/riders/rider-slice';
-import {setOrderActive, setOrder, fetchOrder} from '../../store/features/order/order-slice';
+import {setOrderActive, setOrder, fetchOrder } from '../../store/features/order/order-slice';
 import {colors} from '../../shared/common/styles/';
 import screen_styles from './styles';
 import {
@@ -32,12 +33,16 @@ import {
   updateDrivers,
   addDrivers,
   removeDrivers,
-  clearDriversState
+  clearDriversState,
+  getActiveCars
 } from '../../store/features/drivers/drivers-slice';
+import {clearDriverState} from '../../store/features/drivers/driver-slice';
 import {onDriversUpdated, onDriverDeleted} from '../../graphql/subscriptions';
+import { fetchCurrentUserOrder } from '../../shared/helper/orderHelpers';
 
 const HomeScreen = props => {
   const snapPoints = useMemo(() => ['50%', '100%'], []);
+  const [isLoading, setIsLoading] = useState(true);
   const [message, getMessage] = useState(false);
   const [toggleFav, setToggleFav] = useState(false);
   const [addFav, setAddFav] = useState('hearto');
@@ -76,10 +81,29 @@ const HomeScreen = props => {
   );
 
   useEffect(() => {
-    dispatch(fetchOrder(order?.userId));
-    console.log('order', profile?.sub);
+    const checkActiveOrder = async () => {
+      if (profile?.sub) {
+        try {
+          const activeOrder = await fetchCurrentUserOrder(dispatch, profile.sub);
+          if (activeOrder) {
+            navigation.navigate('Orders', { orderId: activeOrder.id });
+          }
+        } catch (error) {
+          console.error('Error fetching active order:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    };
+    checkActiveOrder();
 
-  }, [profile]);
+    return () => {
+      setIsLoading(false);
+    }
+
+  }, [dispatch, profile?.sub, navigation]);
 
   useEffect(() => {
     dispatch(
@@ -118,6 +142,7 @@ const HomeScreen = props => {
     dispatch(setOrderActive(false));
     dispatch(clearMapState());
     dispatch(clearDriversState());    
+    dispatch(clearDriverState());    
     dispatch(setOrder(null));
     navigation.navigate('MapSearchScreen');
   };
@@ -127,6 +152,25 @@ const HomeScreen = props => {
     return toggleFav ? setAddFav('hearto') : setAddFav('heart');
   };
 
+
+  useEffect(() => {
+    let isMounted = true;
+    if (isMounted) {
+      if(!drivers?.length){
+        dispatch(getActiveCars());
+
+      }
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+
+  const activeStates = useMemo(() => {
+    return drivers.map(driver => driver.isActive).join(',');
+  }, [drivers]);
+
   useEffect(() => {
     if (!drivers) {
       return;
@@ -135,54 +179,31 @@ const HomeScreen = props => {
     subscriptionAddDriversRef.current = API.graphql(
       graphqlOperation(onDriversUpdated),
     ).subscribe({
-      next: ({value}) => {
+      next: ({ value }) => {
         if (onDriversUpdated) {
-          let driver = value.data.onDriversUpdated;
+          const driver = value.data.onDriversUpdated;
           if (driver.isActive) {
-            dispatch(addDrivers(value.data.onDriversUpdated));
+            dispatch(addDrivers(driver));
           } else if (!driver.isActive) {
-            dispatch(removeDrivers(value.data.onDriversUpdated));
+            dispatch(removeDrivers(driver));
           }
         }
       },
       error: error => console.warn(JSON.stringify(error)),
     });
 
-    // subscriptionDeleteDriverRef.current = API.graphql(
-    //   graphqlOperation(onDriverDeleted),
-    // ).subscribe({
-    //   next: ({value}) => {
-    //     if (onDriversUpdated) {
-    //       dispatch(
-    //         setDrivers(drivers => {
-    //           const toDeleteIndex = drivers.findIndex(
-    //             item => item.id === value.data.onDriverDeleted.id,
-    //           );
-    //           return [
-    //             ...drivers.slice(0, toDeleteIndex),
-    //             ...drivers.slice(toDeleteIndex + 1),
-    //           ];
-    //         }),
-    //       );
-    //     }
-    //   },
-    //   error: error => console.warn(JSON.stringify(error)),
-    // });
-
     return () => {
       subscriptionAddDriversRef.current.unsubscribe();
-      //subscriptionDeleteDriverRef.current.unsubscribe();
     };
-  }, []);
+  }, [activeStates]);
 
-  // if (isOrderLoading === true) {
-  //   return (
-  //     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-  //       <ActivityIndicator />
-  //     </View>
-  //   );
-  // }
-
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
   return (
     <>
       {isVisible && (

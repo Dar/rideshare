@@ -23,6 +23,7 @@ import {transparentColor, colors} from '../../shared/common/styles';
 import {getCarTypeImage} from '../../shared/helper/helperFunction';
 import {updateDriverLocation} from '../../store/features/drivers/driver-slice';
 import {onDriverUpdated} from '../../graphql/subscriptions';
+import { calculateDistance,proximityThreshold } from '../../constants';
 
 const OrderMap = ({car}) => {
   const dispatch = useAppDispatch();
@@ -44,27 +45,16 @@ const OrderMap = ({car}) => {
     distance,
   } = useAppSelector(state => state.mapState);
   const {order} = useAppSelector(state => state.orderState);
-  const proximityThreshold = 0.01;
 
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-    console.log('DISTANCE', distance);
 
-    return distance;
-  };
-
-  const toRad = value => {
-    return (value * Math.PI) / 180;
+  const updateMapRegion = () => {
+    const currentPosition = {
+      latitude: car?.currentLat || 0,
+      longitude: car?.currentLng || 0,
+      latitudeDelta: latitudeDelta,
+      longitudeDelta: longitudeDelta,
+    };
+    mapRef?.current?.animateToRegion(currentPosition, 500);
   };
 
   useEffect(() => {
@@ -154,7 +144,7 @@ const OrderMap = ({car}) => {
   //     return;
   //   }
   //   if (
-  //     order?.driverId !== 0 &&
+  //     order?.driverId &&
   //     order?.status === 'PICKING_UP_CLIENT' &&
   //     car?.isActive
   //   ) {

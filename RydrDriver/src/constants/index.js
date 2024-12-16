@@ -20,8 +20,8 @@ export const calculateDistance = (coords1, coords2) => {
       Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distance = R * c; // Distance in kilometers
-  return distance * 1000; // Convert to meters
+  const distance = R * c * 1000; // Distance in km to meters
+  return distance ; // Distance in meters
 };
 
 export const calculateRadius = (lat1, lon1, lat2, lon2) => {
@@ -45,3 +45,6 @@ export const calculateRadius = (lat1, lon1, lat2, lon2) => {
 };
 
 const toRad = angle => (angle * Math.PI) / 180;
+
+
+export const proximityThreshold = 10;

@@ -8,13 +8,13 @@ import {
   setDistance,
   setDuration,
   setTripCoordinates,
+  setRouteNavigation
 } from '../../store/features/map/map-slice';
 import component_styles from './styles';
 import MapMarker from '../../../src/components/UI/MapMarker/index.js';
 import {colors} from '../../shared/common/styles/index.js';
 
 const RouteMap = ({origin, destination}) => {
-  const {height, width} = useWindowDimensions();
   const dispatch = useAppDispatch();
   const [coordinatesReady, setCoordinatesReady] = useState(false);
 
@@ -67,6 +67,7 @@ const RouteMap = ({origin, destination}) => {
   // const region = calculateRegion(originLoc, destinationLoc);
 
   const onDirectionsReady = result => {
+    dispatch(setRouteNavigation(result.legs[0].steps));
     dispatch(setDistance(result.distance));
     dispatch(setDuration(result.duration));
     dispatch(setTripCoordinates(result.coordinates));

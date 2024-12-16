@@ -1,11 +1,9 @@
 import {createSlice, PayloadAction, createAsyncThunk} from '@reduxjs/toolkit';
-import {Dimensions} from 'react-native';
 import Geocoder from 'react-native-geocoding';
 import {getCurrentLocation} from '../../../shared/helper/helperFunction';
-import {GOOGLE_API_KEY} from '@env';
 import {calculateRadius} from '../../../constants';
+import {GOOGLE_API_KEY} from '@env';
 
-const {width, height} = Dimensions.get('window');
 
 const deltaValue = 0.0122;
 interface MapState {
@@ -158,6 +156,10 @@ const mapsSlice = createSlice({
       state.latitudeDelta = latitudeDelta;
       state.longitudeDelta = longitudeDelta;
     },
+    setRouteNavigation(state, action: PayloadAction<any>) {
+      state.routeCoordinates = action.payload;
+    },
+    
     setCurrentPosition(state, action: PayloadAction<any>) {
       const {latitude, longitude, heading} = action.payload;
       const prevLatitude = state.currentLatitude;
@@ -190,20 +192,7 @@ const mapsSlice = createSlice({
     setMapViewBoundariesForCoords(state, action: PayloadAction<any>) {
       state.mapViewBoundariesForCoords = action.payload;
     },
-    setRouteNavigation(state, action: PayloadAction<any>) {
-      const {
-        latitude,
-        longitude,
-        routeCoordinates,
-        distanceTravelled,
-        prevLatLng,
-      } = action.payload;
-      state.latitude = latitude;
-      state.longitude = longitude;
-      state.routeCoordinates = routeCoordinates;
-      state.distanceTravelled = distanceTravelled;
-      state.prevLatLng = prevLatLng;
-    },
+   
     clearMapState(state) {
       state.origin = {};
       state.destination = {};

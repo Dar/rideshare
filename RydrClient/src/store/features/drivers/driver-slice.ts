@@ -7,7 +7,7 @@ import {onDriverUpdated} from '../../../graphql/subscriptions';
 import {getDriver} from '../../../graphql/queries';
 import debounce from 'lodash/debounce';
 export interface DriverState {
-  car?: Driver;
+  car?: Driver | null;
   isLoading: boolean;
   errors: any;
 }
@@ -94,6 +94,14 @@ const driverSlice = createSlice({
   name: 'driver',
   initialState,
   reducers: {
+    updateMovement(state, action: PayloadAction<any>) {
+      const {lat, lng} = action.payload;
+      if (state.car?.currentLat && state.car?.currentLng) {
+        state.car.currentLat = lat;
+        state.car.currentLng = lng;
+      }
+    
+    },
     clearDriverState(state: any): void {
       state.car = null;
     },
@@ -101,12 +109,10 @@ const driverSlice = createSlice({
       state.car = action.payload;
     },
     updateDriverLocation(state, action) {
-      const {currentLat, currentLng, heading} = action.payload;
+      const {lat, lng} = action.payload;
       if (state.car) {
-        console.log('updateDriverLocation', currentLat, currentLng, heading);
-        state.car.currentLat = currentLat;
-        state.car.currentLng = currentLng;
-        state.car.heading = heading;
+        state.car.currentLat = lat;
+        state.car.currentLng = lng;
       }
     },
   },
@@ -122,6 +128,6 @@ const driverSlice = createSlice({
     );
   },
 });
-export const {clearDriverState, setCar, updateDriverLocation} =
+export const {clearDriverState, updateMovement, setCar, updateDriverLocation} =
   driverSlice.actions;
 export default driverSlice.reducer;

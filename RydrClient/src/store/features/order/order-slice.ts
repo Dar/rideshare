@@ -22,7 +22,7 @@ interface Order {
   originAddress: string;
   destinationAddress: string;
   userId: string;
-  driverId: string;
+  driverId: string | null;
   type: string;
   fare: number;
   status: string;
@@ -115,24 +115,30 @@ export const updateActiveOrder = createAsyncThunk(
 
 export const getOrderByUserIdAndStatus = createAsyncThunk(
   'orders/getOrderByUserIdAndStatus',
-  async ({userId, status}: {userId: string; status: string}) => {
+  async (
+    { userId, status }: { userId: string; status: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const orderData = (await API.graphql(
+      const result = (await API.graphql(
         graphqlOperation(ordersByUserId, {
           userId,
-          filter: {status: {eq: status}},
+          filter: { status: { eq: status } },
           limit: 1,
-        }),
-      )) as GraphQLResult<any>;
-      console.log('GET ORDER', JSON.stringify(orderData));
-      return orderData.data.ordersByUserId.items[0];
-    } catch (error) {
-      console.log('getOrder err', error);
+        })
+      )) as GraphQLResult<{ ordersByUserId: { items: Order[] } }>;
 
-      throw error;
+      // Return the first order if it exists; otherwise, return null
+      return result.data?.ordersByUserId?.items?.[0] || null;
+    } catch (error) {
+      console.error('Error fetching order by userId and status:', error);
+      return rejectWithValue(
+        error?.response?.data || error.message || 'An unknown error occurred'
+      );
     }
-  },
+  }
 );
+
 
 const orderSlice = createSlice({
   name: 'orderState',
@@ -140,6 +146,11 @@ const orderSlice = createSlice({
   reducers: {
     setOrder(state, action: PayloadAction<Order>): void {
       state.order = action.payload;
+    },
+    setOrderState(state, action: PayloadAction<any>) {
+      if (state.order) {
+        state.order.status = action.payload;
+      }
     },
     updateOrderData(state, action: PayloadAction<any>): void {
       state.order = {...state.order, ...action.payload};
@@ -156,13 +167,13 @@ const orderSlice = createSlice({
         originAddress: '',
         destinationAddress: '',
         userId: '',
-        driverId: '0',
+        driverId: null,
         type: 'Standard',
         fare: 0.0,
-        status: 'NEW',
-        designate: 'personal',
-        passengerNumber: '1 - 4',
-        paymentType: 'credit_card',
+        status: '',
+        designate: '',
+        passengerNumber: '',
+        paymentType: '',
         notes: '',
         scheduleDate: '',
         pickupTime: '',
@@ -222,30 +233,24 @@ const orderSlice = createSlice({
         state.errors = action.payload;
       });
     builder
-      .addCase(getOrderByUserIdAndStatus.pending, state => {
-        state.isOrderActive = false;
-        state.isOrderLoading = true;
-      })
-      .addCase(
-        getOrderByUserIdAndStatus.fulfilled,
-        (state, action: PayloadAction<any>) => {
-          state.order = action.payload;
-          state.isOrderActive = true;
-          state.isOrderLoading = false;
-        },
-      )
-      .addCase(
-        getOrderByUserIdAndStatus.rejected,
-        (state, action: PayloadAction<any>) => {
-          state.isOrderActive = false;
-          state.errors = action.payload;
-          state.isOrderLoading = false;
-        },
-      );
+    .addCase(getOrderByUserIdAndStatus.pending, (state) => {
+      state.isOrderActive = false;
+      state.isOrderLoading = true;
+    })
+    .addCase(getOrderByUserIdAndStatus.fulfilled, (state, action) => {
+      state.order = action.payload; 
+      state.isOrderActive = true;
+      state.isOrderLoading = false;
+    })
+    .addCase(getOrderByUserIdAndStatus.rejected, (state, action) => {
+      state.isOrderActive = false;
+      state.errors = action.payload; 
+      state.isOrderLoading = false;
+    });
   },
 });
 
-export const {setOrder, clearOrderState, setOrderActive, updateOrderData} =
+export const {setOrder, setOrderState, clearOrderState, setOrderActive, updateOrderData} =
   orderSlice.actions;
 
 export default orderSlice.reducer;
