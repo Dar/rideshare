@@ -67,9 +67,7 @@ const MapViewDirectionsComponent = forwardRef((props, ref) => {
     }
     if (order?.status === 'PICKING_UP_CLIENT') {
       return (
-        <>
           <Marker coordinate={mapViewBoundariesForCoords[1]} pinColor="green" />
-        </>
       );
     }
     if (
@@ -77,9 +75,7 @@ const MapViewDirectionsComponent = forwardRef((props, ref) => {
       order?.status === 'ARRIVED_AT_DESTINATION'
     ) {
       return (
-        <>
           <Marker coordinate={mapViewBoundariesForCoords[1]} pinColor="green" />
-        </>
       );
     }
   };

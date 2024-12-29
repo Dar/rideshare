@@ -47,4 +47,4 @@ export const calculateRadius = (lat1, lon1, lat2, lon2) => {
 const toRad = angle => (angle * Math.PI) / 180;
 
 
-export const proximityThreshold = 10;
+export const proximityThreshold = 100;

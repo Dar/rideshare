@@ -16,7 +16,7 @@ const screen_styles = StyleSheet.create({
     backgroundColor: colors.softwhite,
     width: '100%',
     height: '100%',
-    elevation: 5,
+    elevation: 1,
     zIndex: 2,
     justifyContent: 'space-between',
   },

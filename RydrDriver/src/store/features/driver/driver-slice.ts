@@ -73,7 +73,7 @@ export const fetchDriver = createAsyncThunk(
       );
       return driverData?.data?.getDriver;
     } catch (e) {
-      rejectWithValue(e);
+      return rejectWithValue(e);
     }
   },
 );
@@ -95,7 +95,7 @@ export const updateActiveDriver = createAsyncThunk(
       );
       return updatedCarData?.data?.updateDriver;
     } catch (e) {
-      rejectWithValue(e);
+      return rejectWithValue(e);
     }
   },
 );
@@ -110,7 +110,7 @@ export const onUserLocationChange = createAsyncThunk(
       >(graphqlOperation(updateDriver, {input: {}}));
       return updatedCarData?.data?.updateDriver;
     } catch (e) {
-      rejectWithValue(e);
+      return rejectWithValue(e);
     }
   },
 );
@@ -130,6 +130,9 @@ const driverSlice = createSlice({
     },
     signOutUser(state) {
       state.authUser = undefined;
+    },
+    updateDriverState(state, action: PayloadAction<any>): void {
+      state.data = action.payload;
     },
     clearDriverState(state: any): void {
       state.data = {
@@ -163,7 +166,7 @@ const driverSlice = createSlice({
     );
   },
 });
-export const {setAuth, signOutUser, setLoading, setActive, clearDriverState} =
+export const {updateDriverState, setAuth, signOutUser, setLoading, setActive, clearDriverState} =
   driverSlice.actions;
 
 export default driverSlice.reducer;

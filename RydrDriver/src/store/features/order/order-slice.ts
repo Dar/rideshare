@@ -1,34 +1,13 @@
-import {createSlice, PayloadAction, createAsyncThunk} from '@reduxjs/toolkit';
-import {API, Auth, graphqlOperation} from 'aws-amplify';
-import {GraphQLResult, GraphQLQuery} from '@aws-amplify/api';
-import {getOrder, listOrders, ordersByDriverId} from '../../../graphql/queries';
-import {
-  GetOrderQuery,
-  ListOrdersQuery,
-  OrdersByDriverIdQuery,
-  UpdateOrderMutation,
-} from '../../../API';
-import {createOrder, updateOrder} from '../../../graphql/mutations';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { API, graphqlOperation } from 'aws-amplify';
+import { onOrderUpdated } from '../../../graphql/subscriptions'; // Subscription
+import { updateOrder } from '../../../graphql/mutations'; // Example mutation
 
 interface Order {
   id: string;
   origin: string;
   destination: string;
-  originAddress: string;
-  destinationAddress: string;
-  userId: string;
-  userName: string;
-  driverId: string;
-  type: string;
-  fare: number;
   status: string | null;
-  designate: string;
-  passengerNumber: string;
-  paymentType: string;
-  notes: string;
-  pickupTime?: string;
-  dropoffTime?: string;
-  isFinisihed?: boolean;
 }
 
 export interface OrderState {
@@ -43,56 +22,54 @@ const initialState: OrderState = {
   errors: null,
 };
 
-export const setOrder = createAsyncThunk(
-  'order/setOrder',
-  async (data: any, {rejectWithValue}) => {
+// Action to update the order state
+const updateOrderState = createAsyncThunk(
+  'order/updateOrder',
+  async (orderData: Order, { rejectWithValue }) => {
     try {
-      const orderData = await API.graphql<GraphQLQuery<UpdateOrderMutation>>(
-        graphqlOperation(updateOrder, {
-          input: {
-            ...data,
-          },
-        }),
+      const result = await API.graphql(
+        graphqlOperation(updateOrder, { input: orderData })
       );
-      return orderData?.data?.updateOrder;
-    } catch (e) {
-      rejectWithValue(e.response.data);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error);
     }
-  },
+  }
 );
 
-export const getActiveOrder = createAsyncThunk(
-  'order/getActiveOrder',
-  async (_: any, {rejectWithValue}) => {
-    const authUser = await Auth.currentAuthenticatedUser({bypassCache: true});
-
+// Thunk to handle subscription to order updates
+export const subscribeToOrderUpdates = createAsyncThunk(
+  'order/subscribeToOrderUpdates',
+  async (_, { dispatch, rejectWithValue }) => {
     try {
-      const orderData = await API.graphql<GraphQLQuery<OrdersByDriverIdQuery>>(
-        graphqlOperation(ordersByDriverId, {
-          driverId: authUser.attributes.sub,
-          filter: {status: {eq: 'PICKING_UP_CLIENT'}},
-        }),
-      );
-      return orderData?.data?.ordersByDriverId?.items[0] || null;
-    } catch (e) {
-      rejectWithValue(e.response.data);
+      const subscription = (API.graphql(
+        graphqlOperation(onOrderUpdated)
+      ) as any).subscribe({
+        next: ({ value }: any) => {
+          const updatedOrder = value?.data?.onOrderUpdated;
+          if (updatedOrder) {
+            dispatch(setOrder(updatedOrder));
+          }
+        },
+        error: (error: any) => {
+          console.error('Subscription error:', error);
+        },
+      });
+
+      // Return the unsubscribe function
+      return () => subscription.unsubscribe();
+    } catch (error) {
+      return rejectWithValue(error);
     }
-  },
+  }
 );
 
 const orderSlice = createSlice({
-  name: 'orderState',
+  name: 'order',
   initialState,
   reducers: {
-    setOrderState(state, action: PayloadAction<any>) {
-      if (state.order) {
-        state.order.status = action.payload;
-      }
-    },
-    setOrderStatus(state, action: PayloadAction<any>) {
-      if (state.order) {
-        state.order.status = action.payload;
-      }
+    setOrder(state, action: PayloadAction<Order>) {
+      state.order = action.payload;
     },
     clearOrderState(state) {
       state.order = null;
@@ -101,35 +78,16 @@ const orderSlice = createSlice({
     },
   },
   extraReducers(builder) {
-    builder.addCase(setOrder.fulfilled, (state, action: PayloadAction<any>) => {
-      state.order = action.payload;
-    });
-    builder.addCase(
-      getActiveOrder.pending,
-      (state, action: PayloadAction<any>) => {
+    builder
+      .addCase(updateOrderState.fulfilled, (state, action: PayloadAction<any>) => {
         state.order = action.payload;
-        state.isLoading = true;
-      },
-    );
-    builder.addCase(
-      getActiveOrder.fulfilled,
-      (state, action: PayloadAction<any>) => {
-        state.order = action.payload;
-        state.isLoading = false;
-      },
-    );
-    builder.addCase(
-      getActiveOrder.rejected,
-      (state, action: PayloadAction<any>) => {
-        state.order = null;
+      })
+      .addCase(subscribeToOrderUpdates.rejected, (state, action) => {
         state.errors = action.payload;
-        state.isLoading = true;
-      },
-    );
+      });
   },
 });
 
-export const {clearOrderState, setOrderState, setOrderStatus} =
-  orderSlice.actions;
+export const { setOrder, clearOrderState } = orderSlice.actions;
 
 export default orderSlice.reducer;

@@ -13,18 +13,7 @@ export interface DriverState {
 }
 
 const initialState: DriverState = {
-  car: {
-    id: '',
-    type: '',
-    given_name: '',
-    family_name: '',
-    phone_number: '',
-    isActive: false,
-    currentLat: 0,
-    currentLng: 0,
-    heading: 0,
-    orders: [],
-  },
+  car: null,
   isLoading: false,
   errors: null,
 };
@@ -50,8 +39,7 @@ export const getCar = createAsyncThunk(
       };
       return driverAttributes;
     } catch (e) {
-      console.log(e.response.data);
-      rejectWithValue(e.response.data);
+      return rejectWithValue(e.response.data);
     }
   },
 );
@@ -100,7 +88,6 @@ const driverSlice = createSlice({
         state.car.currentLat = lat;
         state.car.currentLng = lng;
       }
-    
     },
     clearDriverState(state: any): void {
       state.car = null;
@@ -109,10 +96,12 @@ const driverSlice = createSlice({
       state.car = action.payload;
     },
     updateDriverLocation(state, action) {
-      const {lat, lng} = action.payload;
+      const {currentLat, currentLng, heading} = action.payload;
+      console.log('Driver updated:', currentLat, currentLng, heading);
       if (state.car) {
-        state.car.currentLat = lat;
-        state.car.currentLng = lng;
+        state.car.currentLat = currentLat;
+        state.car.currentLng = currentLng;
+        state.car.heading = heading;
       }
     },
   },

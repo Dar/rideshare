@@ -15,7 +15,6 @@ export const fetchCurrentUserOrder = async (dispatch, profileSub) => {
       ).unwrap();
   
       if (activeOrder) {
-        console.log('Active Order Found:', activeOrder);
         return activeOrder;
       }
   

@@ -21,7 +21,7 @@ import {
 } from '../../store/features/map/map-slice';
 import {transparentColor, colors} from '../../shared/common/styles';
 import {getCarTypeImage} from '../../shared/helper/helperFunction';
-import {updateDriverLocation} from '../../store/features/drivers/driver-slice';
+import {updateDriverLocation, updateMovement} from '../../store/features/drivers/driver-slice';
 import {onDriverUpdated} from '../../graphql/subscriptions';
 import { calculateDistance,proximityThreshold } from '../../constants';
 
@@ -30,6 +30,7 @@ const OrderMap = ({car}) => {
   const scaleAnimationRef = useRef(new Animated.Value(0)).current;
   const opacityAnimationRef = useRef(new Animated.Value(1)).current;
   const deltaValue = 0.0122;
+  const activeDriver = useRef();
   const {height, width} = useWindowDimensions();
   const aspectRatio = (width / height) * deltaValue;
   const mapRef = useRef(null);
@@ -126,48 +127,27 @@ const OrderMap = ({car}) => {
   }, [order]);
 
   // Subscribe to car updates
-  // useEffect(() => {
-  //   if (!car) {
-  //     return;
-  //   }
-  //   if (
-  //     order?.driverId !== 0 &&
-  //     order?.status === 'PICKING_UP_CLIENT' &&
-  //     car?.isActive
-  //   ) {
-  //     dispatch(driverSubscriptionUpdate(order?.driverId));
-  //   }
-  // }, [order?.driverId, order?.status, car?.isActive]);
-
-  // useEffect(() => {
-  //   if (!car) {
-  //     return;
-  //   }
-  //   if (
-  //     order?.driverId &&
-  //     order?.status === 'PICKING_UP_CLIENT' &&
-  //     car?.isActive
-  //   ) {
-  //     const subscription = API.graphql(
-  //       graphqlOperation(onDriverUpdated, {id: order.driverId}),
-  //     ).subscribe({
-  //       next: response => {
-  //         const updatedDriver = response.value.data.onDriverUpdated;
-  //         console.log('UPDATE', updatedDriver);
-  //         if (updatedDriver) {
-  //           const {currentLat, currentLng, heading} = updatedDriver;
-  //           dispatch(updateDriverLocation({currentLat, currentLng, heading}));
-  //         }
-  //       },
-  //       error: error => {
-  //         console.error('Subscription error:', error);
-  //       },
-  //     });
-  //     return () => {
-  //       subscription.unsubscribe();
-  //     };
-  //   }
-  // }, [order?.driverId, order?.status, car?.isActive]);
+  useEffect(() => {
+    if (!car) {
+      return;
+    }
+    if (car) {
+      activeDriver.current = API.graphql(
+        graphqlOperation(onDriverUpdated, {id: order.driverId}),
+      ).subscribe({
+        next: response => {
+          const updatedDriver = response.value.data.onDriverUpdated;
+          const {currentLat, currentLng, heading} = updatedDriver;
+          dispatch(updateDriverLocation({currentLat, currentLng, heading}));
+       
+        },
+        error: error => {
+          console.error('Subscription error:', error);
+        },
+      });
+      return () => activeDriver.current?.unsubscribe?.();
+    }
+  }, [car]);
 
   useEffect(() => {
     let mounted = true;
@@ -204,43 +184,50 @@ const OrderMap = ({car}) => {
   }, [mapViewBoundariesForCoords[0], mapViewBoundariesForCoords[1], distance]);
 
   const showMarkers = () => {
-    if (order?.status === 'PICKING_UP_CLIENT') {
-      return (
-        <>
-          <Marker.Animated
-            key={car?.id}
-            coordinate={{latitude: car?.currentLat, longitude: car?.currentLng}}
-            anchor={{x: 0.45, y: 0.65}}>
-            <View style={styles.infoBox}>
-              <Text style={styles.infoBoxText}>{Math.ceil(duration)} min</Text>
-            </View>
-            <Image
-              style={{
-                width: 50,
-                height: 50,
-                resizeMode: 'contain',
-                transform: [
-                  {
-                    rotate: `${car?.heading}deg`,
-                  },
-                ],
-              }}
-              source={getCarTypeImage(car?.type)}
-            />
-          </Marker.Animated>
-          <Marker
-            coordinate={{
-              latitude: origin?.details?.geometry?.location?.lat,
-              longitude: origin?.details?.geometry?.location?.lng,
+    const isPickingUpClient = order?.status === 'PICKING_UP_CLIENT';
+    const isArrivedForPickup = order?.status === 'ARRIVED_FOR_PICKUP';
+    const isStartingTrip = order?.status === 'STARTING_TRIP';
+  
+    const passengerCoordinates = isPickingUpClient
+      ? {
+          latitude: origin?.details?.geometry?.location?.lat,
+          longitude: origin?.details?.geometry?.location?.lng,
+        }
+      : {
+          latitude: destination?.details?.geometry?.location?.lat,
+          longitude: destination?.details?.geometry?.location?.lng,
+        };
+  
+    return (
+      <>
+        <Marker.Animated
+          key={car?.id}
+          coordinate={{ latitude: car?.currentLat, longitude: car?.currentLng }}
+          anchor={{ x: 0.45, y: 0.65 }}
+        >
+          <View style={styles.infoBox}>
+            <Text style={styles.infoBoxText}>{Math.ceil(duration)} min</Text>
+          </View>
+          <Image
+            style={{
+              width: 50,
+              height: 50,
+              resizeMode: 'contain',
+              transform: [{ rotate: `${car?.heading}deg` }],
             }}
-            pinColor="green"
+            source={getCarTypeImage(car?.type)}
           />
-        </>
-      );
-    } else {
-      return null;
-    }
+        </Marker.Animated>
+        {(isPickingUpClient || isArrivedForPickup || isStartingTrip) && (
+          <Marker
+            coordinate={passengerCoordinates}
+            pinColor={isPickingUpClient ? 'green' : 'red'}
+          />
+        )}
+      </>
+    );
   };
+  
 
   return (
     <MapView
@@ -274,7 +261,7 @@ const OrderMap = ({car}) => {
         latitudeDelta: latitudeDelta,
         longitudeDelta: longitudeDelta,
       }}>
-      {order?.status === 'PICKING_UP_CLIENT' &&
+      {order?.status &&
       mapViewBoundariesForCoords.length ? (
         <>
           <MapViewDirections
@@ -297,7 +284,7 @@ const OrderMap = ({car}) => {
           longitude: currentLongitude,
         }}
         anchor={{x: 0.5, y: 0.5}}>
-        {order?.status !== 'PICKING_UP_CLIENT' ? (
+        {!order ? (
           <Animated.View style={styles.markerWrap}>
             <Animated.View
               style={[

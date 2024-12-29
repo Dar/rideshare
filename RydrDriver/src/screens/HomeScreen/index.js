@@ -52,6 +52,7 @@ import {
 import {
   fetchDriver,
   updateActiveDriver,
+  updateDriverState,
 } from '../../store/features/driver/driver-slice';
 import {
   fetchOrders,
@@ -281,7 +282,6 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (order?.status === 'PICKING_UP_CLIENT') {
-      console.log('tripDistance', tripDistance);
       if (tripDistance <= proximityThreshold) {
         dispatch(setOrderState('ARRIVED_FOR_PICKUP'));
         const input = {
@@ -298,7 +298,7 @@ const HomeScreen = () => {
         const input = {
           id: order.id,
           status: 'ARRIVED_AT_DESTINATION',
-          driverId: data.id,
+          driverId: data?.id,
         };
         dispatch(setOrder(input));
       }
@@ -372,38 +372,31 @@ const HomeScreen = () => {
   // ****************************************
   // ****************************************
 
-  useEffect(() => {
-    if (order?.status === 'PICKING_UP_CLIENT') {
-      const interval = setInterval(() => {
-        dispatch(updateMovement(routeCoordinates[0]?.end_location));
-        dispatch(setRouteNavigation(routeCoordinates.slice(1)));
-        // dispatch(
-        //   updateActiveDriver({
-        //     currentLat: currentLatitude,
-        //     currentLng: currentLongitude,
-        //     heading,
-        //   }),
-        // );
-      }, 1000);
+  // useEffect(() => {
+  //   if (order?.status === 'PICKING_UP_CLIENT') {
+  //     const interval = setInterval(() => {
+  //       dispatch(updateMovement(routeCoordinates[0]?.end_location));
+  //       dispatch(setRouteNavigation(routeCoordinates.slice(1)));
+  //     }, 2500);
 
-      if (!routeCoordinates.length) {
-        clearInterval(interval);
-      }
+  //     if (!routeCoordinates.length) {
+  //       clearInterval(interval);
+  //     }
 
-      return () => clearInterval(interval);
-    } else if (order?.status === 'STARTING_TRIP') {
-      const interval = setInterval(() => {
-        dispatch(updateMovement(routeCoordinates[0]?.end_location));
-        dispatch(setRouteNavigation(routeCoordinates.slice(1)));
-      }, 1000);
+  //     return () => clearInterval(interval);
+  //   } else if (order?.status === 'STARTING_TRIP') {
+  //     const interval = setInterval(() => {
+  //       dispatch(updateMovement(routeCoordinates[0]?.end_location));
+  //       dispatch(setRouteNavigation(routeCoordinates.slice(1)));
+  //     }, 2500);
 
-      if (!routeCoordinates.length) {
-        clearInterval(interval);
-      }
+  //     if (!routeCoordinates.length) {
+  //       clearInterval(interval);
+  //     }
 
-      return () => clearInterval(interval);
-    }
-  }, [routeCoordinates.length, order?.status]);
+  //     return () => clearInterval(interval);
+  //   }
+  // }, [routeCoordinates.length, order?.status]);
 
   // ******************** END RUN TRIP SIMULATOR
   // ****************************************
@@ -563,12 +556,10 @@ const HomeScreen = () => {
         graphqlOperation(onDriverUpdated, {id: data?.id}),
       ).subscribe({
         next: ({value}) => {
-          console.log('activeDriver', value);
-
           const updatedDriver = value.data.onDriverUpdated;
           if (updatedDriver) {
             dispatch(
-              updateActiveDriver({
+              updateDriverState({
                 id: data?.id,
                 ...updatedDriver,
               }),
@@ -579,8 +570,17 @@ const HomeScreen = () => {
       });
     }
 
-    return () => activeDriver.current.unsubscribe();
+    return () => activeDriver.current?.unsubscribe?.();
   }, [data]);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      dispatch(updateActiveDriver(data));
+    }, 5000); 
+
+    return () => clearInterval(interval); 
+  }, [currentLongitude, currentLatitude]);
+
 
   useEffect(() => {
     let mounted = true;

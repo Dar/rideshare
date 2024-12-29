@@ -5,12 +5,17 @@ const screen_styles = StyleSheet.create({
   screenContainer: {
     display: 'flex',
     flexDirection: 'column',
-    flex: 1,
-    height: '100%',
   },
 
   goSearchButtonContainer: {
     paddingHorizontal: 10,
+    marginTop: 25,
+  },
+
+  tripDetailsContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
   },
 
   goSearchButton: {

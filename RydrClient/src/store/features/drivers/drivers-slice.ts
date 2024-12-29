@@ -1,9 +1,9 @@
-import {createSlice, PayloadAction, createAsyncThunk} from '@reduxjs/toolkit';
-import {API, graphqlOperation} from 'aws-amplify';
-import {GraphQLResult} from '@aws-amplify/api';
-import {listDrivers} from '../../../graphql/queries';
-import {ListDriversQuery} from '../../../API';
-import {Driver} from './interface';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { API, graphqlOperation } from 'aws-amplify';
+import { GraphQLResult } from '@aws-amplify/api';
+import { listDrivers } from '../../../graphql/queries';
+import { ListDriversQuery } from '../../../API';
+import { Driver } from './interface';
 import {
   onCreateDriver,
   onDriverUpdated,
@@ -19,17 +19,17 @@ const initialState: DriverState = {
 };
 
 export const getActiveCars = createAsyncThunk(
-  'drivers/getCurrrentDrivers',
-  async (data, {rejectWithValue}) => {
+  'drivers/getCurrentDrivers',
+  async (data, { rejectWithValue }) => {
     try {
       const response = (await API.graphql(
-        graphqlOperation(listDrivers, {filter: {isActive: {eq: true}}}),
+        graphqlOperation(listDrivers, { filter: { isActive: { eq: true } } })
       )) as GraphQLResult<ListDriversQuery>;
-     return response?.data?.listDrivers?.items;
+      return response?.data?.listDrivers?.items;
     } catch (e) {
-      rejectWithValue(e.response.data);
+      return rejectWithValue(e.response.data);
     }
-  },
+  }
 );
 
 const driversSlice = createSlice({
@@ -42,18 +42,25 @@ const driversSlice = createSlice({
     setDrivers(state, action: PayloadAction<any>) {
       state.drivers = [...state.drivers, action.payload];
     },
-    addDrivers(state, action: PayloadAction<any>) {
-      state.drivers = [...state.drivers, action.payload];
-    },
-    updateDrivers(state, action: PayloadAction<any>) {
-      const updateDriverIndex = state.drivers.findIndex(
-        driver => driver.id === action.payload.id,
+    addDrivers(state, action: PayloadAction<Driver>) {
+      const exists = state.drivers.some(
+        (driver) => driver.id === action.payload.id
       );
-      state.drivers[updateDriverIndex] = action.payload;
+      if (!exists && action.payload.isActive) {
+        state.drivers.push(action.payload);
+      }
     },
-    removeDrivers: (state, action) => {
+    updateDrivers(state, action: PayloadAction<Driver>) {
+      const updateDriverIndex = state.drivers.findIndex(
+        (driver) => driver.id === action.payload.id
+      );
+      if (updateDriverIndex !== -1) {
+        state.drivers[updateDriverIndex] = action.payload;
+      }
+    },
+    removeDrivers(state, action: PayloadAction<Driver>) {
       state.drivers = state.drivers.filter(
-        driver => driver.id !== action.payload.id,
+        (driver) => driver.id !== action.payload.id
       );
     },
   },
@@ -61,11 +68,12 @@ const driversSlice = createSlice({
     builder.addCase(
       getActiveCars.fulfilled,
       (state, action: PayloadAction<any>) => {
-        state.drivers = [...action.payload];
-      },
+        state.drivers = action.payload.filter((driver) => driver.isActive);
+      }
     );
   },
 });
+
 export const {
   clearDriversState,
   setDrivers,

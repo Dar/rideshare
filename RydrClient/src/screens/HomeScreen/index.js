@@ -167,36 +167,34 @@ const HomeScreen = props => {
   }, []);
 
 
-  const activeStates = useMemo(() => {
-    return drivers.map(driver => driver.isActive).join(',');
-  }, [drivers]);
+  // const activeStates = useMemo(() => {
+  //   return drivers.map(driver => driver.isActive).join(',');
+  // }, [drivers]);
 
-  useEffect(() => {
-    if (!drivers) {
-      return;
-    }
-
-    subscriptionAddDriversRef.current = API.graphql(
-      graphqlOperation(onDriversUpdated),
-    ).subscribe({
-      next: ({ value }) => {
-        if (onDriversUpdated) {
-          const driver = value.data.onDriversUpdated;
-          if (driver.isActive) {
-            dispatch(addDrivers(driver));
-          } else if (!driver.isActive) {
-            dispatch(removeDrivers(driver));
-          }
-        }
-      },
-      error: error => console.warn(JSON.stringify(error)),
-    });
-
-    return () => {
-      subscriptionAddDriversRef.current.unsubscribe();
-    };
-  }, [activeStates]);
-
+  // useEffect(() => {
+  //   if (!drivers) {
+  //     return;
+  //   }
+  
+  //   subscriptionAddDriversRef.current = API.graphql(
+  //     graphqlOperation(onDriversUpdated)
+  //   ).subscribe({
+  //     next: ({ value }) => {
+  //       const driver = value.data.onDriversUpdated;
+  //       if (driver.isActive) {
+  //         dispatch(addDrivers(driver));
+  //       } else {
+  //         dispatch(removeDrivers(driver));
+  //       }
+  //     },
+  //     error: (error) => console.warn(JSON.stringify(error)),
+  //   });
+  
+  //   return () => {
+  //     subscriptionAddDriversRef.current.unsubscribe();
+  //   };
+  // }, [dispatch, activeStates]);
+  
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

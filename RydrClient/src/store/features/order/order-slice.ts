@@ -78,7 +78,6 @@ export const getActiveOrder = createAsyncThunk(
 export const fetchOrder = createAsyncThunk(
   'order/fetchOrder',
   async (data, {rejectWithValue}) => {
-    console.log('FETCH ORDER', data);
     try {
       const orderData = (await API.graphql(
         graphqlOperation(getOrder, {id: data}),
@@ -128,13 +127,38 @@ export const getOrderByUserIdAndStatus = createAsyncThunk(
         })
       )) as GraphQLResult<{ ordersByUserId: { items: Order[] } }>;
 
-      // Return the first order if it exists; otherwise, return null
       return result.data?.ordersByUserId?.items?.[0] || null;
     } catch (error) {
       console.error('Error fetching order by userId and status:', error);
       return rejectWithValue(
         error?.response?.data || error.message || 'An unknown error occurred'
       );
+    }
+  }
+);
+
+export const subscribeToOrderUpdates = createAsyncThunk(
+  'order/subscribeToOrderUpdates',
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const subscription = (API.graphql(
+        graphqlOperation(onOrderUpdated)
+      ) as any).subscribe({
+        next: ({ value }: any) => {
+          const updatedOrder = value?.data?.onOrderUpdated;
+          if (updatedOrder) {
+            dispatch(setOrder(updatedOrder));
+          }
+        },
+        error: (error: any) => {
+          console.error('Subscription error:', error);
+        },
+      });
+
+      // Return the unsubscribe function
+      return () => subscription.unsubscribe();
+    } catch (error) {
+      return rejectWithValue(error);
     }
   }
 );

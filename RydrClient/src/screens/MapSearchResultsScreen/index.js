@@ -28,7 +28,6 @@ import {
   setDestinationAddress,
   setOriginPlace,
 } from '../../store/features/map/map-slice';
-import {GOOGLE_API_KEY} from '@env';
 import RippleButton from '../../components/UI/RippleButton';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -139,7 +138,7 @@ const MapSearchResultsScreen = props => {
               ) : null}
             </View>
             {/* Details of the ride */}
-            <View style={{flex: 1}}>
+            <View style={screen_styles.tripDetailsContainer}>
               <RideTypeSelect
                 typeState={order?.type ? order.type : 'Standard'}
               />

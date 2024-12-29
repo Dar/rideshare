@@ -29,28 +29,29 @@ import {
   updateActiveOrder,
   setOrderActive,
   setOrderState,
-  clearOrderState
+  clearOrderState,
 } from '../../store/features/order/order-slice';
 import {clearDriverState} from '../../store/features/drivers/driver-slice';
-import { calculateDistance, proximityThreshold } from '../../constants/index.js';
+import {calculateDistance, proximityThreshold} from '../../constants/index.js';
 
 import {
   getCar,
   setCar,
   driverSubscriptionUpdate,
   updateMovement,
-  updateDriverLocation
+  updateDriverLocation,
 } from '../../store/features/drivers/driver-slice';
-import {useKeepAwake} from '@sayem314/react-native-keep-awake';
-
 import RippleButton from '../../components/UI/RippleButton';
 import {AlertWithCallback} from '../../components/UI/Alert';
 import {onDriverUpdated, onOrderUpdated} from '../../graphql/subscriptions';
-import {setMapViewBoundariesForCoords,clearMapState, setRouteNavigation} from '../../store/features/map/map-slice';
+import {
+  setMapViewBoundariesForCoords,
+  clearMapState,
+  setRouteNavigation,
+} from '../../store/features/map/map-slice';
 import {useFocusEffect} from '@react-navigation/native';
 
 const OrderScreen = props => {
-  useKeepAwake();
   const route = useRoute();
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
@@ -69,12 +70,11 @@ const OrderScreen = props => {
     latitudeDelta,
     longitudeDelta,
     routeCoordinates,
-    tripCoordinates
+    tripCoordinates,
   } = useAppSelector(state => state.mapState);
   const {car} = useAppSelector(state => state.driver);
   const {order, isOrderActive} = useAppSelector(state => state.orderState);
   const [isVisible, setIsVisible] = useState(false);
-
 
   const tripDistance = useMemo(() => {
     let distance = 50;
@@ -92,6 +92,7 @@ const OrderScreen = props => {
             },
           );
           break;
+        case 'ARRIVED_FOR_PICKUP':
         case 'STARTING_TRIP':
         case 'ARRIVED_AT_DESTINATION':
           distance = calculateDistance(
@@ -114,7 +115,6 @@ const OrderScreen = props => {
 
   useEffect(() => {
     if (order?.status === 'PICKING_UP_CLIENT') {
-
       if (tripDistance <= proximityThreshold) {
         dispatch(setOrderState('ARRIVED_FOR_PICKUP'));
         const input = {
@@ -126,7 +126,6 @@ const OrderScreen = props => {
       }
     }
     if (order?.status === 'STARTING_TRIP') {
-
       if (tripDistance <= proximityThreshold) {
         dispatch(setOrderState('ARRIVED_AT_DESTINATION'));
         const input = {
@@ -138,7 +137,6 @@ const OrderScreen = props => {
       }
     }
   }, [tripDistance, order?.status]);
-
 
   useFocusEffect(
     useCallback(() => {
@@ -171,7 +169,7 @@ const OrderScreen = props => {
 
   useEffect(() => {
     let interval;
-    
+
     if (!order?.driverId) {
       interval = setInterval(() => {
         setAnimationText(prevText => {
@@ -230,35 +228,50 @@ const OrderScreen = props => {
   }, [order]);
 
   useEffect(() => {
-    if (!order?.status || !car?.currentLat || !car?.currentLng) return;
-  
+    if (!order || !car) return;
+
     const getBoundaries = () => {
       if (order.status === 'PICKING_UP_CLIENT') {
         return [
-          { latitude: car.currentLat, longitude: car.currentLng },
-          { latitude: origin?.details?.geometry?.location?.lat, longitude: origin?.details?.geometry?.location?.lng },
+          {latitude: car?.currentLat, longitude: car?.currentLng},
+          {
+            latitude: origin?.details?.geometry?.location?.lat,
+            longitude: origin?.details?.geometry?.location?.lng,
+          },
         ];
       }
-  
-      if (order.status === 'STARTING_TRIP') {
+
+      if (
+        order.status === 'ARRIVED_FOR_PICKUP' ||
+        order.status === 'STARTING_TRIP' ||
+        order.status === 'ARRIVED_AT_DESTINATION'
+      ) {
         return [
-          { latitude: origin?.details?.geometry?.location?.lat, longitude: origin?.details?.geometry?.location?.lng },
-          { latitude: destination?.details?.geometry?.location?.lat, longitude: destination?.details?.geometry?.location?.lng },
+          {latitude: car?.currentLat, longitude: car?.currentLng},
+          {
+            latitude: destination?.details?.geometry?.location?.lat,
+            longitude: destination?.details?.geometry?.location?.lng,
+          },
         ];
       }
-  
+
       return [
-        { latitude: origin?.details?.geometry?.location?.lat, longitude: origin?.details?.geometry?.location?.lng },
-        { latitude: destination?.details?.geometry?.location?.lat, longitude: destination?.details?.geometry?.location?.lng },
+        {
+          latitude: origin?.details?.geometry?.location?.lat,
+          longitude: origin?.details?.geometry?.location?.lng,
+        },
+        {
+          latitude: destination?.details?.geometry?.location?.lat,
+          longitude: destination?.details?.geometry?.location?.lng,
+        },
       ];
     };
-  
+
     const boundaries = getBoundaries();
     if (boundaries) {
       dispatch(setMapViewBoundariesForCoords(boundaries));
     }
   }, [order?.status, car?.currentLat, car?.currentLng, origin, destination]);
-  
 
   const cancelOrder = () => {
     return AlertWithCallback(
@@ -298,41 +311,6 @@ const OrderScreen = props => {
     setShowBox(!showBox);
   };
 
-
-  // ******************** RUN TRIP SIMULATOR
-  // **************************************** 
-  // **************************************** 
-
-  // useEffect(() => {
-  //   if (order?.status === 'PICKING_UP_CLIENT') {
-  //     const interval = setInterval(() => {
-  //       dispatch(updateDriverLocation(routeCoordinates[0]?.end_location));
-  //       dispatch(setRouteNavigation(routeCoordinates.slice(1)));
-  //     }, 1000);
-
-  //     if (!routeCoordinates.length) {
-  //       clearInterval(interval);
-  //     }
-
-  //     return () => clearInterval(interval);
-  //   } else if (order?.status === 'STARTING_TRIP') {
-  //     const interval = setInterval(() => {
-  //       dispatch(updateDriverLocation(routeCoordinates[0]?.end_location));
-  //       dispatch(setRouteNavigation(routeCoordinates.slice(1)));
-  //     }, 1000);
-
-  //     if (!routeCoordinates.length) {
-  //       clearInterval(interval);
-  //     }
-
-  //     return () => clearInterval(interval);
-  //   }
-  // }, [routeCoordinates.length, order?.status]);
-
-  // ******************** END RUN TRIP SIMULATOR
-  // **************************************** 
-  // **************************************** 
-
   return (
     <>
       {isVisible && (
@@ -362,8 +340,12 @@ const OrderScreen = props => {
               position: 'relative',
               zIndex: 0,
               width: '100%',
+              height: '100%',
             }}>
-            <OrderMap car={car} origin={origin} destination={destination} />
+            <OrderMap 
+              car={car} origin={origin} 
+              destination={destination} 
+            />
           </Animated.View>
 
           <Animated.View
@@ -435,7 +417,7 @@ const OrderScreen = props => {
                 </Pressable>
               </BoxItem>
               <BoxItem style={screen_styles.orderDetailsItem}>
-                <View style={[screen_styles.driverContact, {marginRight: 10}]}>
+                <View style={[screen_styles.driverContact, { marginRight: 10 }]}>
                   <AntDesign
                     name="message1"
                     color={colors.softwhite}

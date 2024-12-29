@@ -37,6 +37,7 @@
     "caniuse-lite": "^1.0.30001517",
     "geolib": "^3.3.3",
     "haversine": "^1.1.1",
+    "lodash": "^4.17.21",
     "react": "17.0.2",
     "react-countdown-circle-timer": "^3.2.1",
     "react-devtools": "^4.26.1",
